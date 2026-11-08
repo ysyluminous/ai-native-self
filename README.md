@@ -1,224 +1,166 @@
-﻿<div align="center">
-
 # ai-native-self · 个人 AI 原生基座
 
-> *「AI 只能读得懂机器读得懂的东西。没被 AI 读到的记录，等于不存在。」*
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Standard-green)](https://agentskills.io)
-[![Runtime](https://img.shields.io/badge/Runtime-Codex%20·%20Claude%20Code%20·%20Cursor%20·%20Gemini%20CLI-blueviolet)](#安装)
-[![Storage](https://img.shields.io/badge/Storage-Markdown%20%2B%20git%20%2B%20grep-lightgrey)](#它不做什么)
+> 「AI 只能读懂机器读得懂的东西。没被 AI 读到的记录，等于不存在。」
 
 **把你自己的思想、决策、吃喝拉撒，变成 AI 读得懂、蒸馏得动、换模型也能接手的语料。**
 这不是笔记软件，是一个**只给你自己用的认知流水线 + 可插拔的思维框架插槽**。
 
-</div>
+纯 Markdown + git。没有数据库、没有向量库、没有账号、没有云。
+
+- 读法：`SKILL.md` 是协议，`kernel/` 是硬规则，`templates/` 是字段模板
+- 用法：clone 下来，一条命令生成你自己的私有语料仓库，然后只管往里倾倒
 
 ---
 
-## 30 秒理解这个项目
+## 30 秒理解
 
 | 传统 PKM / 云端 AI 记忆 | ai-native-self |
 |---|---|
-| 你负责整理、分类、打标签 | **你只管倾倒，AI 负责归档**（20 秒规则） |
-| 记了就躺在文件夹里 | 日/周/月/季**硬节律**蒸馏，复盘不出动作视为未完成 |
-| 存在某家云上，换工具就丢 | 纯 Markdown + 你自己的私有 git，**换模型也能接手** |
-| AI 记忆在它那边，不可审计 | 每条断言带证据等级、置信度、**推翻条件** |
-| 内置一套"正确"的方法论 | **内核中立**：思维内容是可插拔的模型包，你可以自建或只用自己编译出的那一份 |
+| 你负责整理、分类、打标签 | 你只管倾倒，AI 负责归档（20 秒规则） |
+| 记了就躺在文件夹里 | 日 / 周 / 月 / 季硬节律蒸馏，复盘不出动作视为未完成 |
+| 存在某家云上，换工具就丢 | 纯 Markdown + 你自己的私有 git，换模型也能接手 |
+| AI 记忆在它那边，不可审计 | 每条断言带证据等级、置信度、推翻条件 |
+| 内置一套"正确"的方法论 | 内核中立：思维内容是可插拔的模型包 |
 
-一句话：**女娲（nuwa-skill）把别人蒸馏成 skill；这个项目帮你把自己蒸馏成语料，再装上别人的框架。**
+一句话：**别的工具帮你把别人蒸馏成 skill，这个项目帮你把自己蒸馏成语料。**
 
-## 架构：三层，职责不混
+## 三层架构：职责不混
 
 ```
-L0 kernel  内核（本仓库，版本化，只读）     ← 结构件 / 采集协议 / 节律 / 记录 schema / 隐私护栏
-L1 corpus  语料（你的私有 git 仓库）        ← 唯一真相源，六类一等公民，UTF-8 Markdown
-L2 packs   模型包（可插拔）                 ← self（你自己编译的）+ 借来的：人物包（芒格/南怀瑾/…）
-                                                与方法包（贝叶斯校准这类不带任何人的框架）
-派生物     reviews/ index/ 日报              ← 随时删除重建，永远不是真相源
+L0 kernel  内核（本仓库，公开，只读）     结构件 / 采集协议 / 节律 / schema / 隐私护栏
+L1 corpus  语料（你的私有仓库，不在这）   唯一真相源，六类记录，UTF-8 Markdown
+L2 packs   模型包（可插拔）              self（自己编译的）+ 借来的框架
+派生物      reviews/ index/             随时删除重建，永远不是真相源
 ```
 
-**内核给裁判规则，包给裁判结论。冲突时结构件优先。** 这是"框架中立"的技术含义：
-这个项目不告诉你该怎么想，它保证你的记录能被诚实地读、被反复地质疑、被安全地备份。
+**内核给裁判规则，包给裁判结论。冲突时结构件优先。**
+
+这个仓库只装 L0。你的数据在你自己的仓库里，永远不进这里 —— 这是它能公开的唯一原因。
 
 ## 安装
 
 ```bash
-npx skills add ysyluminous/ai-native-self          # 或
+# 方式一：作为 Agent Skill 安装（Codex / Claude Code / Cursor / Gemini CLI / opencode）
+npx skills add ysyluminous/ai-native-self
+
+# 方式二：直接 clone 到 skill 目录
 git clone https://github.com/ysyluminous/ai-native-self ~/.codex/skills/ai-native-self
 ```
 
-然后生成你自己的语料仓库：
+然后在任何目录生成你自己的语料仓库：
 
 ```bash
 node ~/.codex/skills/ai-native-self/scripts/init.mjs ~/life --time 22:30
 ```
 
-在 `~/life` 里打开任意 agent，说：**「记一下：今天 …」** 就开始了。
-（脚手架幂等，不会覆盖任何已有文件；`--priv secret` 可改默认隐私等级。把自己的用户名换掉即可 fork 一份。）
+脚手架是**幂等**的：不覆盖任何已有文件，重复跑只会补缺。
 
-## 效果示例
+## 五分钟上手
 
-**① 倾倒 → 归档（用户的动作：一行字。其余是 AI 的活）**
-
-```
-你  ❯ 记一下：今天看了第 12 套房，中介催定金我没答应。睡了 6.1 小时，体脂 25.8。
-
-AI  ❯ 已归档：
-    • inbox/2026-H2.md → [[20261011-e12]] slot:body topic:[health/sleep, money/housing]
-    • metrics/body-fat.md → - 2026-10-11 25.8
-    • decisions/20261011-buy-house.md 命中同一议题，已合并观测（未新建重复页）
-    待补 1 项：这条决策还没有 worst_case 和 tolerable，明天补一行就行，不催。
+```bash
+cd ~/life
+git init
 ```
 
-**② 决策（探图未达标 → 不允许拍板）**
+打开 agent，说：
 
 ```
-你  ❯ 我该不该现在买这套房？
-
-AI  ❯ 先定性：one-way door（撤销成本极高）→ 强制探图。
-    你现在：独立信息源 2 个（要求 ≥3），样本 12 套（目标 30）。
-    按内核 #3，我不能给你"买/不买"，只能给：暂缓 + 本周把图开大的三件事：…
-    另外 #12 执行前提检查：现金流缓冲 4 个月 < 9 个月 → status: blocked-on-precondition。
-    要不要我按这个把决策落库？
+记一下：今天跟供应商谈崩了，对方要预付 50%，我没答应
 ```
 
-**③ 月度信念审计（核心机制：被推翻是产出）**
+它会做三件事，在同一条回复里：
+
+1. 在 `inbox/2026-H2.md` 追加一条 Event（不追问、不评判）
+2. 把出现的实体、决策、数字分别落到 `entities/ decisions/ metrics/`
+3. 回一句进度：「已归档 3 条，1 个决策待补最坏值」
+
+之后每天 30 秒倾倒，第四周说「周复盘」，第十二周说「季度编译我」。
+节律写在 [`kernel/cadence.md`](kernel/cadence.md)：复盘不收敛到一个可检查的动作 + 一个检查日期，就算没做完。
+
+## 目录结构
 
 ```
-AI  ❯ 本月被推翻的信念 2 条：
-    • bel-014「我在 deadline 前产出更高」0.7 → 0.15，触发证据 [[20261010-e11]]、[[20260912-e03]]
-    • bel-021「A 项目不需要谈薪」0.6 → overturned，最坏值算错了
-    这两条计为产出，已写入 artifacts/。
-    next_action: 把 bel-014 的 falsifier 改成可观测指标 by 2026-11-05 check: 两个长周期项目复盘同批完成
+<你的语料仓库>/
+├── inbox/          Event：唯一倾倒入口，半年一文件，只追加
+├── entities/       人、组织、项目、资产、地点（一个实体一页）
+├── decisions/      一决策一文件：可逆性、开图、最坏值、复盘日期
+├── beliefs/        你自己的认知：证据等级、confidence、推翻条件
+├── artifacts/      产出：文章、代码、作品
+├── metrics/        数字台账：体重、睡眠、支出、心率，一行一观测
+├── reviews/        派生物：日 / 周 / 月 / 季
+├── attachments/    原件：截图、账单、录音转写
+├── packs/          模型包：self/ + 借来的
+├── secret/         默认 git 排除：不进 git、不进索引、不进日报
+└── index/          派生索引，可删可重建
 ```
 
-**④ 插一套思维框架（不绑定任何人）**
+字段定义在 [`kernel/record-types.md`](kernel/record-types.md)，空白模板在 [`templates/`](templates/)。
 
-```
-你  ❯ 给芒格建一个包
+## 六类一等公民
 
-AI  ❯ 先说材料等级：我能拿到 A 级原文的只有《穷查理宝典》某几个章节的扫描件，
-    演讲原文需要你提供链接；如果你只能给二手摘要，这个包会被建成 low-evidence，
-    按契约不能进决策顾问团。现在开始建骨架？
-    （建成后必须填 domain-na：芒格框架在 <你的领域> 上是无效的，我会明确写出）
-```
-
-**⑤ 两个包真打起来（这才是"中立"的证据）**
-
-```
-你  ❯ 用芒格和贝叶斯两个包，帮我分析这套要不要下定金，输出分歧表
-
-AI  ❯ 两包给出相反动作，按 bayes 包的裁决顺序第 1 步判定：
-    • 这个判断能写出到期日 + 0/1 判定标准吗？→ 能（"11-30 前同地段可比成交价 ±5%"）→ 进第 2 步
-    • 决策可逆性：one-way（定金/违约条款未读）→ 且你在圈外（税制、持有成本）→ **munger 优先**
-    • 于是 bayes 只能输出它被允许输出的部分：参照类分布（你过去 12 套的挂牌价 vs 成交价）
-      + "这个数不可验证"的标注；munger 输出：先离开催单环境，圈外问题去找能负责的人
-    分歧未消除，按内核 #10 原样呈现：
-    | 议题 | munger | bayes |
-    |---|---|---|
-    | 现在该不该付定金 | 不该，属"太难"筐 → 放下 | 不必付，但要把"我判断不了"记成带截止日的假设 |
-    | 分歧根源假设 | 反馈昂贵、能力圈是硬约束 → 离散分类 | 概率能被结果打分 → 连续信念度 |
-    没有"综合两方意见"的合成结论。落库：decisions/20261011-buy-house.md + refs 两个包版本。
-```
-
-> 以上五段是按协议写的**框架演示**。想看一次**真跑过的**执行（含实测 `grep` 输出、阳性/负对照、
-> 分歧表、落库 diff）：[`examples/council-run-2026-10-11.md`](examples/council-run-2026-10-11.md)。
-> 该样例的语料是虚构的，但检索与校验步骤是本机实际命令输出；可直接复现，见 `examples/README.md`。
-> 注意那次只跑了 `munger + self` **两方**；上面第 ⑤ 段的**三方对撞还没实跑过**（列在 `CHANGELOG.md` 已知缺口里）。
-
-## 六类记录（细节见 `kernel/record-types.md`）
-
-| 类型 | 目录 | 为什么单独一类 |
+| 类型 | 回答什么问题 | 关键字段 |
 |---|---|---|
-| Event | `inbox/` | 唯一倾倒入口，追加不改写 |
-| Entity | `entities/` | 人/组织/项目/资产，一页一实体 |
-| Decision | `decisions/` | 决策是最可复利的记录，带 `review_on` |
-| Belief | `beliefs/` | 你自己的认知，带置信度与**推翻条件** |
-| Artifact | `artifacts/` | 产出（含"被推翻的信念"也算产出） |
-| Metric | `metrics/` | 一行一观测，不做宽表 |
+| Event | 那天发生了什么 | 时间、原文、refs |
+| Decision | 我怎么定的，能不能反悔 | 可逆性、最坏值、review_on |
+| Entity | 这个人/项目到哪一步了 | 关系、状态、最近接触 |
+| Belief | 我凭什么这么想 | 证据等级、置信度、**推翻条件** |
+| Metric | 身体和钱到底怎么走的 | 指标、值、单位、测量方式 |
+| Artifact | 我做出过什么 | 标题、外链、关联决策 |
 
-## 冷启动时间表（防止一上来搭大系统）
+每条记录一个块，块首是 YAML front matter —— 所以 `grep` 就能定位，不需要数据库。
 
-第 1-2 周只写 `inbox/` → 第 3 周加 ≤3 个指标 → 第 4 周开 `decisions/` 与第一次周复盘 →
-第 8 周开 `beliefs/` 与月审 → 第 12 周编译 `packs/self/`、装第一个外部包、可选建索引。
+## 思维框架是可插拔的
 
-**在 200 条语料之前建议上数据库/向量 RAG 的，都视为违反本协议。**
+官方随仓库带两个包，复制进你的仓库就能用：
 
-## 模型包路线
+```bash
+cp -r packs/bayes ~/life/packs/
+cp -r packs/munger ~/life/packs/
+node scripts/lint-packs.mjs ~/life      # 结构自检，12 项
+```
 
-| 包 | 状态 | 说明 |
-|---|---|---|
-| `self` | ✅ 契约内置 | 每季度从你的**实际记录**里编译"我真的按什么活"，不是我以为的我 |
-| `_template` | ✅ 已提供 | 自建包的骨架，含 lint 12 项与压力测试要求 |
-| `munger` | ✅ 0.1.0 · experimental | 6 模型 / 7 启发式 / 冲突表 + 裁决顺序 / 3 问压力测试；证据 **B 级**（讲稿为转载、纸本页码未核），可进顾问团但**不可**作逐字引语；未核金句一律标 `verified: false` |
-| `bayes` | ✅ 0.1.0 · experimental | **方法包**（`kind: method`，无扮演模式）：信念度可下注性检验 / 更新必须由新证据支付 / 参照类与外部视角 / 概率颗粒化 / **Brier 校准台账协议** / 时间平均≠期望值；证据 **A 级 = 引文条目可定位**（不是原文逐字已读）；与 `munger` 在"太难该不该放下"上是真分歧，附四步裁决规则 |
-| `nan-huaijin` / `ni-haixia` | 🚧 计划中 | 见 `packs/registry.md`；医学类与修行类有强制护栏，缺 A/B 级材料就只发 low-evidence |
+包的登记与限制见 [`packs/registry.md`](packs/registry.md)：证据等级是 B 的包不得当逐字引语，
+带失效条件的包才收。想建自己的包，从 [`packs/_template/pack.md`](packs/_template/pack.md) 开始。
 
-自建包回流社区的门槛：**缺失效条件的包直接拒收**；未证实数字当事实的包直接拒收。
+## 可测评 · 可迭代
+
+这个仓库自己给自己打分：
+
+```bash
+node scripts/score.mjs          # 九维结构分，0–100
+node scripts/score.mjs --min 85 # 低于阈值退出码 1，可挂 CI
+node scripts/init.mjs /tmp/demo --no-git   # 冒烟：能不能生成一套干净仓库
+node scripts/lint-packs.mjs examples/life-repo
+```
+
+**分数只升不降。** 每轮只改一个维度，改完独立评分，涨了保留、掉了 `git revert`。
+完整规则见 [`docs/evolution.md`](docs/evolution.md)。当前基线写在里面，随时可复算。
 
 ## 它不做什么
 
-- 不做数据库、不做向量库、不做云端同步、不做账号体系、不做遥测、不收集任何数据。
-- 不替你判断价值排序；不冒充任何人的观点；不自动触发任何模型包。
-- 不是医疗、法律、投资、心理服务。健康与金钱只给"框架 + 需专业确认清单"。
-- 不锁定：删掉这个 skill，你的仓库仍然是完全可读的纯文本。**退出成本必须永远是零。**
+- 不帮你写内容，不替你判断，不替你决定 —— 它只保证你的记录被诚实读到
+- 不联网、不上传、不做 embedding、不调用任何第三方服务
+- 不内置任何"正确"的价值观；名人类的包不自动触发
+- 不替代医生、律师、投资顾问；涉及这些领域只作思路框架
 
-## 隐私（必读 `PRIVACY.md`）
+## 隐私
 
-本地优先；语料绝不外发（含 embedding、云同步、联网搜索的 query）；
-`secret/` 默认不进 git、不进索引、不进日报；涉及可识别第三方、身份、敏感诊断的内容默认降级。
+硬约束见 [`PRIVACY.md`](PRIVACY.md)：本地优先、绝不外发语料、`priv: secret` 不进日报/索引/git。
+这个仓库本身不含任何个人数据；你在自己的私有仓库里写的一切，也永远不会回到这里。
 
-## 版权与出处（必读 `NOTICE.md`）
+## 贡献
 
-本仓库原创内容 MIT。设计灵感来自公开访谈中"把生活 AI 化、数据在自己手里、机器读得懂才值钱"
-三点，本仓库**不含**任何访谈转录、语录原文，也不代表任何被提及的人。
-第三方素材不进入本仓库；模型包各自声明材料来源与证据等级。
+- 改规则：每条断言必须带**证据等级**与**推翻条件**，缺了不收
+- 改 schema：必须向前兼容，并在 [`CHANGELOG.md`](CHANGELOG.md) 写迁移说明
+- 改模板：与 `kernel/record-types.md` 在同一个提交里改
+- 提交前：`node scripts/score.mjs --min 85` 必须过；动过 `packs/` 规则的话，再在自己语料仓库上跑一次 `node scripts/lint-packs.mjs <你的语料仓库>`
+- 样例必须虚构；真实用户数据不许进 `examples/`
 
-## 目录
+细读 [`AGENTS.md`](AGENTS.md)，那是给 agent 的贡献指南。
 
-```
-ai-native-self/
-├── SKILL.md                      # 七段协议（agent 读这个）
-├── kernel/                       # L0 内核：中立结构件
-│   ├── principles.md             #   12 条结构件，每条带失效条件
-│   ├── record-types.md           #   六类记录与字段
-│   ├── capture.md                #   20 秒规则 / 8 槽位 / 隐私分级 / 冷启动
-│   └── cadence.md                #   日 / 周 / 月 / 季节律与触发语
-├── packs/                        # L2 插槽契约
-│   ├── README.md                 #   模型包契约：必填字段 / 必备章节 / lint / 强制护栏
-│   ├── registry.md               #   官方包登记（计划中的不算存在）
-│   ├── munger/pack.md            #   人物包（B 级，experimental，双模式）
-│   ├── bayes/pack.md             #   方法包（A 级=引文可定位，无扮演模式）
-│   └── _template/pack.md         #   自建包骨架（含 lint 12 项自检表）
-├── templates/                    # 六类记录模板
-├── examples/                     # 可复现的实测样例（含一次完整顾问团）
-├── scripts/
-│   ├── init.mjs                  #   零依赖脚手架（幂等）
-│   └── lint-packs.mjs            #   包结构 lint：字段/章节/四件套/registry 一致性 + 阳性对照
-├── agents/openai.yaml
-├── PRIVACY.md · NOTICE.md · CHANGELOG.md · LICENSE
-```
+## 许可证
 
-## 常见问题
+MIT。见 [LICENSE](LICENSE)。
 
-**语料几千条以后 grep 不够用怎么办？**
-先按 `--exclude-dir` 收窄范围；确实要索引时，用外部脚本在 `index/`（已 gitignore）里建 SQLite FTS5，
-Markdown 仍是唯一真相源，索引可随删随重建。
-
-**换模型/换工具会丢什么？**
-不丢。数据是你的 Markdown；内核重新 clone 一份即可。历史包引用保存了当时的 `pack@version`。
-
-**我真的记不住每天写。**
-协议支持双周甚至月度节律，也支持把 5 天攒着一次补录（`date` 写实际日期、`recorded` 分开）。
-中断不被视为失败；伪造连续性才是失败。
-
-**能不能只装别人的包、不记自己的？**
-可以，但那样得到的只是第二个"名人口吻"的 skill——市面上已经有女娲了。这个项目的增益来自
-`packs/self/`：只有被你自己行为反复验证的东西才配进你的认知模型。
-
----
-
-*拿回人生主动权，从能被读到的记录开始。*
-
-MIT License © 2026 ai-native-self contributors · 设计灵感出处与引用边界见 [NOTICE.md](NOTICE.md)
+评测与进化机制受 [darwin-skill](https://github.com/alchaincyf/darwin-skill)（MIT）与微软研究院
+SkillLens / SkillOpt 的思路启发，用于本项目的结构评分与棘轮回滚。

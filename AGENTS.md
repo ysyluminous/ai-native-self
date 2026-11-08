@@ -66,7 +66,7 @@ node scripts/lint-packs.mjs ../my-life          # 检查 packs 结构是否合�
 # 1. 没有个人数据混进来
 git diff --cached | grep -Ei "password|token|@|/Users/|C:\\\\Users|mysql://|ssh-rsa"
 # 2. 包结构合规
-node scripts/lint-packs.mjs examples/life-repo
+node scripts/score.mjs --min 85
 ```
 
-第二条只对 `examples/life-repo` 跑，它是唯一带 packs 的样例。
+第二条是结构分闸门，低于 85 就别提交。
