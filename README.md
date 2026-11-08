@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # ai-native-self · 个人 AI 原生基座
 
@@ -44,8 +44,8 @@ L2 packs   模型包（可插拔）                 ← self（你自己编译�
 ## 安装
 
 ```bash
-npx skills add <owner>/ai-native-self          # 或
-git clone https://github.com/<owner>/ai-native-self ~/.codex/skills/ai-native-self
+npx skills add ysyluminous/ai-native-self          # 或
+git clone https://github.com/ysyluminous/ai-native-self ~/.codex/skills/ai-native-self
 ```
 
 然后生成你自己的语料仓库：
@@ -55,7 +55,7 @@ node ~/.codex/skills/ai-native-self/scripts/init.mjs ~/life --time 22:30
 ```
 
 在 `~/life` 里打开任意 agent，说：**「记一下：今天 …」** 就开始了。
-（脚手架幂等，不会覆盖任何已有文件；`--priv secret` 可改默认隐私等级。全文的 `<owner>` 换成你的 GitHub 用户名。）
+（脚手架幂等，不会覆盖任何已有文件；`--priv secret` 可改默认隐私等级。把自己的用户名换掉即可 fork 一份。）
 
 ## 效果示例
 

@@ -1,4 +1,4 @@
----
+﻿---
 name: ai-native-self
 description: |
   Personal AI-native knowledge base: turn your own life — events, decisions, thoughts,
@@ -18,7 +18,7 @@ license: MIT
 compatibility: Codex, Claude Code, Cursor, Gemini CLI, and other Agent Skills-compatible runtimes
 metadata:
   author: ai-native-self
-  repository: https://github.com/<owner>/ai-native-self   # 发布前替换为真实仓库地址
+  repository: https://github.com/ysyluminous/ai-native-self
   version: 0.1.0
   storage: Markdown + git + grep (no DB, no embedding, no lock-in)
   layers: kernel(read-only) / corpus(user-owned) / packs(pluggable)
