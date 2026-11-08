@@ -1,0 +1,12 @@
+# 内核仓库只放方法论与脚手架，不放任何个人数据
+# 个人语料在各自的私有数据仓库里，由 scripts/init.mjs 生成
+
+node_modules/
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# 本地试跑 init.mjs 生成的样例仓库，不应提交
+/sandbox/
+/tmp/
