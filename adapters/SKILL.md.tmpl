@@ -1,0 +1,74 @@
+---
+name: ai-native-self-vault
+description: |
+  Read and write the user's personal knowledge vault (an ai-native-self data repo) from any
+  AI tool: WorkBuddy, Trae, Cursor, Claude Code, Codex, opencode.
+  Use whenever the user wants to log/record something about their own life or work, archive a
+  decision, look up what they decided before, or hand work between tools.
+  Triggers on: 「记一下」「存进我的库」「归档一下」「查我以前怎么想的」「我之前定过什么」
+  「我的原生库」「个人原生」「知识库」, "log this", "remember this", "what did I decide before".
+  Do NOT use for general questions unrelated to the user's own records.
+---
+
+# 个人原生库 · 跨工具读写协议
+
+> 一个库，所有工具共用。**Markdown 是唯一真相**，索引和记忆库都是派生品，删了能重建。
+
+## 0. 库在哪
+
+本文件由 `adapters/install.mjs` 渲染，路径已写死：
+
+```
+{{VAULT}}
+```
+
+下面所有命令都在该目录执行。路径变了就重跑一次安装。
+
+## 1. 先读，别急着问
+
+```bash
+cat 目录.md                                  # 分域导航
+node scripts/search.mjs "涨粉" --limit 8       # 全文检索（中文二元切分）
+node scripts/q.mjs list                       # 结构化数据有哪些具名查询
+node scripts/recall.mjs "笔记库在哪里 怎么用"   # 问跨会话记忆
+```
+
+三句话：**自己写过的话** → `search.mjs`；**表格型业务数据** → `q.mjs`；**"上次定过什么"** → `recall.mjs`。
+
+## 2. 写，只走一个入口
+
+```bash
+node scripts/capture.mjs "这次的结论" --tool workbuddy --topic x-creator
+node scripts/capture.mjs "决定先上域名再加口令" --tool trae --type decision --topic zhishu
+```
+
+- `--tool` 填你自己的名字（workbuddy / trae / cursor / claude / codex / opencode）
+- `--type` 取 `event`（默认）/ `decision` / `entity` / `belief` / `metric` / `artifact`
+- `--topic` 逗号分隔，用于主题反链
+- 长文本走管道：`... | node scripts/capture.mjs - --tool cursor`
+
+它会自己算 id、日期、分片文件（`inbox/YYYY-MM.<tool>.md`）并重建索引。**不要手写 front matter 往 inbox 里塞**——分片按工具隔离，就是为了多个工具同时写不撞车。
+
+写完回一句「已归档 N 条」，不要背全文。
+
+## 3. 硬规则（违反就停）
+
+1. **不写 `kernel/ templates/ examples/`**——那是指向内核仓库的目录链接，改它等于改公开仓库。
+2. **语料永不进公开仓库**；远端只能是私有语料库。
+3. 不写密码、令牌、连接串到任何文件。
+4. 只追加，不改、不删 `inbox/` 历史块；要更正用新记录 + `supersede:`。
+5. 抓不到的数就不写，绝不编。
+6. 涉及身体指标、用药、投资、法律的结论，只给框架 + 标出需要本人确认的部分。
+
+## 4. 什么时候必须写回
+
+一次工作里出现下面任何一种，结束前必须落库，否则等于没发生：
+
+- 定下了一个方案、取舍、边界（→ `decision`）
+- 跑通了一条可复用的流程（→ `artifact`，写清输入、步骤、验收）
+- 发现了用户自己的偏好或纠正（→ `event`，topic 带 `preference`）
+- 产生了可交付文件（→ `artifact`，正文写绝对路径）
+
+## 5. 交接物是文件，不是聊天记录
+
+给下一个工具留信息，只写三样：文件绝对路径、`projectId`/`nodeId` 这类外部 ID、验收结论。别让下一个工具去翻上一个工具的对话。

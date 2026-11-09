@@ -105,6 +105,37 @@ node ~/.codex/skills/ai-native-self/scripts/init.mjs ~/life --time 22:30
 
 脚手架是**幂等**的：不覆盖任何已有文件，重复跑只会补缺。
 
+### 接进 WorkBuddy / Trae / Cursor / Claude Code / Codex
+
+同一个语料库，所有工具共用一份协议。装一次，协议改一处全生效：
+
+```bash
+node adapters/install.mjs --vault ~/life
+node adapters/install.mjs --vault ~/life --force   # 协议更新后重渲染
+```
+
+它只做两件事：把 `adapters/SKILL.md.tmpl` 渲染进各工具的 skills 目录；给支持常驻指令的工具追加一段指针。
+
+| 工具 | skill 落点 | 常驻规则 |
+|---|---|---|
+| Claude Code | `~/.claude/skills/` | `~/.claude/CLAUDE.md`（脚本自动写） |
+| Codex | `~/.codex/skills/` | `~/.codex/AGENTS.md`（脚本自动写） |
+| WorkBuddy | `~/.workbuddy/skills/` | `~/.workbuddy/SOUL.md`（脚本自动追加） |
+| Cursor | `~/.cursor/skills/` | 设置 → 用户规则，贴下面这段 |
+| Trae | `~/.trae/skills/` | 设置 → 用户规则，贴下面这段 |
+
+Trae / Cursor 的规则不在文件里，安装完把这段贴进「用户规则」（路径换成本机的）：
+
+```text
+我的个人事实、决策、笔记、产出都在 /Users/me/life。
+查用 node scripts/search.mjs / q.mjs / recall.mjs；写只用 node scripts/capture.mjs "内容" --tool <工具名> --topic 主题。
+定下方案、跑通流程、产出文件，结束前必须落库。
+```
+
+**多工具同时写不会撞车**：写入只走 `scripts/capture.mjs`，每个工具写自己的分片 `inbox/YYYY-MM.<tool>.md`，只追加不改历史块，写完自动重建索引。
+
+**交接物只认三样**：文件绝对路径、`projectId` / `nodeId` 这类外部 ID、验收结论。聊天记录不算。
+
 ## 五分钟上手
 
 ```bash
