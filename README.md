@@ -229,6 +229,11 @@ node scripts/lint-packs.mjs examples/life-repo
 硬约束见 [`PRIVACY.md`](PRIVACY.md)：本地优先、绝不外发语料、`priv: secret` 不进日报/索引/git。
 这个仓库本身不含任何个人数据；你在自己的私有仓库里写的一切，也永远不会回到这里。
 
+## 多智能体协作
+
+一件事从想法走到人确认，结构在 [`kernel/coord.md`](kernel/coord.md)：五段状态机、一段一个 owner、
+亲和度优先、决策靠接力、完成与人确认分离。实现（共享库、认领、心跳、决策表）放在私有语料仓库的 `scripts/coord/`。
+
 ## 贡献
 
 - 改规则：每条断言必须带**证据等级**与**推翻条件**，缺了不收
