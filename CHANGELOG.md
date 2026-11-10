@@ -1,7 +1,37 @@
-# Changelog
+﻿# Changelog
 
 遵循 [Keep a Changelog](https://keepachangelog.com/) 与语义化版本。
 **向后兼容承诺**：语料 schema 只做追加式字段新增；破坏性变更必须提供迁移脚本且不删除用户数据。
+
+## 0.2.0 — 2026-11-10
+
+补齐**写入层**：内核第一次能自己闭环（写 → 读 → 体检 → 复盘），不再依赖私有语料仓库里那份不存在的脚本。
+
+### Added
+- `scripts/capture.mjs`：唯一写入入口。算 id、按月×工具分片、隐私路由（`--priv secret` 直写 `secret/`）、
+  追加块、写后重建索引。六类记录都走它：实体按业务键合并、决策重名拒写、metric 一行一观测。
+- `scripts/search.mjs`：中文二元切分检索，`--selftest` 阳性对照（先证明链路活着，再报 0 命中）。
+- `scripts/q.mjs`：11 个具名结构化查询（到期决策、低置信信念、断链、secret 越界、节律断档、已装包…）。
+- `scripts/recall.mjs`：跨会话记忆召回，按"结论形状"回答（决策 status 与最坏值、信念置信度与推翻条件、事件原文）。
+- `scripts/check.mjs`：语料体检。`FAIL` 阻断提交（重复 id、断链、secret 越界、缺 falsifier、把派生物当真相源），
+  `WARN` 只提示节律与派生层；`--selftest` 先自造 7 类缺陷验证必须全部报出、干净仓库必须 0 FAIL。
+- `scripts/lib.mjs`：共享库（找仓库 / 解析 front matter 块 / 切词 / 重建索引），避免每个脚本各自理解 schema。
+
+### Changed
+- `adapters/install.mjs`：脚本存在性判据从"用户库里有 `capture.mjs`"改为"内核里有"；渲染时同时写死 `VAULT` 与 `KERNEL`。
+  旧判据会让任何由 `init.mjs` 新生成的库都装不上——内核从来不生成那些脚本。
+- `adapters/SKILL.md.tmpl`：命令全部改指内核绝对路径；新增第 6 节"交活前跑一次体检"。
+- **inbox 分片规则统一为「月 × 工具」**：`inbox/YYYY-MM.md`（单工具）与 `inbox/YYYY-MM.<tool>.md`（多工具并发）。
+  旧库的 `inbox/YYYY-H2.md` 继续被识别、不迁移、不重排，capture 自动沿用。
+  这条修的是此前 `capture.md`（半年一文件）与 `adapters/SKILL.md.tmpl`（按工具分片）互相矛盾。
+- `scripts/init.mjs`：新库生成 `inbox/YYYY-MM.md`；`git init` 改用 `stdio: 'ignore'`
+  （受限环境里不再因 piped stdio 失败而静默跳过）；生成的 `AGENTS.md` 增补"写入只走一个入口"与常用命令段。
+- 内核结构分 **95 → 100**：可执行具体性那 4 处模糊措辞改成等义、更精确的写法
+  （都落在"禁止/降级"语境里，语义未变），其余八维不变。
+
+### Removed
+- CHANGELOG 尾部两条 `2026-10-18` / `2026-10-19`：它们引用的是 L1 语料侧的 `inbox e60 / e64` 与
+  `packs/sun-yuchen`，既破 Keep a Changelog 格式，也越过"内核不含个人语料"的边界。内核侧无对应变更。
 
 ## 0.1.0 — 2026-10-11
 
@@ -61,6 +91,3 @@
   尚未实跑**，四步裁决规则目前只有契约推演，没有执行记录。
 - 未在 Codex/Claude Code/Cursor/Gemini CLI 四家 runtime 上逐一实机验证装载行为。
 
-## 2026-10-18 - 结构 v2：X 域八件套迁入 自媒体/X/（详情见 inbox e60）
-
-## 2026-10-19 - 人物库上线：人物.md 索引 + packs/sun-yuchen 0.1.0（详情见 inbox e64）

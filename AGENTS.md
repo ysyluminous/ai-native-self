@@ -40,7 +40,16 @@ kernel/               四条硬规则
 templates/            八种记录的空白模板
 packs/                官方包（munger、bayes）+ 模板 + 登记表
 examples/             可复现样例，语料是虚构的
-scripts/              init.mjs（生成数据仓库）、lint-packs.mjs（结构自检）
+scripts/              零依赖 Node，全部住在内核里（用户库不留代码副本）
+  lib.mjs             共享库：找仓库 / 解析 front matter 块 / 切词 / 重建索引
+  init.mjs            生成语料仓库（幂等，不覆盖已有文件）
+  capture.mjs         唯一写入入口：算 id、按月×工具分片、隐私路由、重建索引
+  search.mjs          全文检索（中文二元切分，带 --selftest 阳性对照）
+  q.mjs               具名结构化查询（到期决策 / 低置信信念 / 断链 / secret 越界…）
+  recall.mjs          跨会话记忆召回（"我以前怎么想的"）
+  check.mjs           语料体检（断链、重复 id、缺 falsifier、secret 越界；带 --selftest）
+  lint-packs.mjs      包结构自检（12 项，带 --selftest 阳性对照）
+  score.mjs           内核九维结构分（棘轮闸门）
 ```
 
 ## 常用命令
@@ -48,9 +57,17 @@ scripts/              init.mjs（生成数据仓库）、lint-packs.mjs（结构
 ```bash
 node scripts/init.mjs ../my-life --time 22:30   # 生成一个数据仓库
 node scripts/lint-packs.mjs ../my-life          # 检查 packs 结构是否合契约
+node scripts/score.mjs --min 85                 # 内核结构分闸门
+
+# 内核脚本对语料仓库的全部操作（都在语料仓库目录里跑，或用 --vault 指定）
+node <内核>/scripts/capture.mjs "内容" --topic 主题     # 写
+node <内核>/scripts/search.mjs "词"                    # 全文
+node <内核>/scripts/q.mjs list                         # 结构化查询
+node <内核>/scripts/recall.mjs "问句"                   # 记忆召回
+node <内核>/scripts/check.mjs                          # 体检
 ```
 
-两个脚本都是零依赖的 Node，不需要 npm install。
+全部零依赖的 Node 标准库，不需要 npm install。
 
 ## 改规则时的硬约束
 

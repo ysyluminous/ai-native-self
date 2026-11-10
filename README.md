@@ -128,11 +128,13 @@ Trae / Cursor 的规则不在文件里，安装完把这段贴进「用户规则
 
 ```text
 我的个人事实、决策、笔记、产出都在 /Users/me/life。
-查用 node scripts/search.mjs / q.mjs / recall.mjs；写只用 node scripts/capture.mjs "内容" --tool <工具名> --topic 主题。
+查用 node <内核目录>/scripts/search.mjs / q.mjs / recall.mjs；写只用 node <内核目录>/scripts/capture.mjs "内容" --tool <工具名> --topic 主题。
 定下方案、跑通流程、产出文件，结束前必须落库。
 ```
 
-**多工具同时写不会撞车**：写入只走 `scripts/capture.mjs`，每个工具写自己的分片 `inbox/YYYY-MM.<tool>.md`，只追加不改历史块，写完自动重建索引。
+**多工具同时写不会撞车**：写入只走内核的 `scripts/capture.mjs`，每个工具写自己的分片
+`inbox/YYYY-MM.<tool>.md`，只追加不改历史块，写完自动重建索引。分片按「月 × 工具」，
+检索对 `inbox/*.md` 一视同仁——所以并发写入不需要任何锁。
 
 **交接物只认三样**：文件绝对路径、`projectId` / `nodeId` 这类外部 ID、验收结论。聊天记录不算。
 
@@ -162,7 +164,7 @@ git init
 
 ```
 <你的语料仓库>/
-├── inbox/          Event：唯一倾倒入口，半年一文件，只追加
+├── inbox/          Event：唯一倾倒入口，按月分片只追加（旧库的半年一文件继续被识别）
 ├── entities/       人、组织、项目、资产、地点（一个实体一页）
 ├── decisions/      一决策一文件：可逆性、开图、最坏值、复盘日期
 ├── beliefs/        你自己的认知：证据等级、confidence、推翻条件
@@ -174,6 +176,9 @@ git init
 ├── secret/         默认 git 排除：不进 git、不进索引、不进日报
 └── index/          派生索引，可删可重建
 ```
+
+写入只有一个入口，读有三个：`capture.mjs` 写、`search.mjs` 全文、`q.mjs` 结构化、`recall.mjs` 记忆召回。
+脚本住在**内核**里，不在你的语料仓库里——内核升级不影响数据，也不会在你的库里留下代码副本。
 
 字段定义在 [`kernel/record-types.md`](kernel/record-types.md)，空白模板在 [`templates/`](templates/)。
 
@@ -211,6 +216,7 @@ node scripts/lint-packs.mjs ~/life      # 结构自检，12 项
 node scripts/score.mjs          # 九维结构分，0–100
 node scripts/score.mjs --min 85 # 低于阈值退出码 1，可挂 CI
 node scripts/init.mjs /tmp/demo --no-git   # 冒烟：能不能生成一套干净仓库
+node scripts/check.mjs --selftest          # 语料体检的阳性对照：脏仓库必须报出 7 类缺陷
 node scripts/lint-packs.mjs examples/life-repo
 ```
 

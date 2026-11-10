@@ -1,4 +1,4 @@
----
+﻿---
 name: ai-native-self
 description: |
   Personal AI-native knowledge base: turn your own life — events, decisions, thoughts,
@@ -19,7 +19,7 @@ compatibility: Codex, Claude Code, Cursor, Gemini CLI, and other Agent Skills-co
 metadata:
   author: ai-native-self
   repository: https://github.com/ysyluminous/ai-native-self
-  version: 0.1.0
+  version: 0.2.0
   storage: Markdown + git + grep (no DB, no embedding, no lock-in)
   layers: kernel(read-only) / corpus(user-owned) / packs(pluggable)
 ---
@@ -98,6 +98,9 @@ metadata:
 
 细则见 `kernel/capture.md`。
 
+**写入只走一个入口**：`node <skill>/scripts/capture.mjs "<内容>" --topic <主题>`。它负责算 id、
+按月×工具分片、隐私路由（`--priv secret` 直写 `secret/`）、追加块、重建索引。不要手拼 front matter。
+
 1. 用户说任何"记一下 / 今天…"→ 追加一条 Event 到当期 `inbox/` 文件末尾。**不要重写历史块。**
 2. **20 秒规则**：一次倾倒超过 20 秒就是设计错误。不追问细节、不做评判、不要求填表。
 3. 用户倾倒完，AI 在**同一次回复里**完成归档：分类、打 tag、补 `refs`，把出现的实体/决策/
@@ -130,6 +133,10 @@ metadata:
 才能进 self 包。
 
 ## 协议四 · 检索（grep 优先，无 DB）
+
+**先用脚本，再退回 grep**：`scripts/search.mjs`（全文，中文二元切分）/ `scripts/q.mjs`（结构化：
+到期决策、低置信信念、断链、secret 越界…）/ `scripts/recall.mjs`（"我以前怎么想的"）。
+下面是它们的底层等价配方，脚本不可用时照抄；两者必须给出同样的命中。
 
 约定与配方（全库检索默认排除派生物与私密区：`--exclude-dir=secret --exclude-dir=index --exclude-dir=.git`）：
 
@@ -190,6 +197,9 @@ metadata:
 - 明确不做：不上传到任何第三方服务、不做云端同步、不做账号体系。
 
 ## 一致性自检（每次批量写入后）
+
+一条命令：`node <skill>/scripts/check.mjs`（`FAIL` 阻断提交，`WARN` 只提示节律与派生层；
+`--selftest` 自带阳性对照）。下面是它执行的规则，脚本不可用时照此手工做一遍。
 
 1. id 唯一：`grep -rho "^id: .*" --include="*.md" --exclude-dir=secret --exclude-dir=index . | sort | uniq -d` 应为空。
 2. 孤儿反链：`refs` 指向的 id 是否存在。
