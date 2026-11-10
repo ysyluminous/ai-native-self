@@ -13,41 +13,47 @@ description: |
 # 个人原生库 · 跨工具读写协议
 
 > 一个库，所有工具共用。**Markdown 是唯一真相**，索引和记忆库都是派生品，删了能重建。
+> 脚本住在**内核**里，不在库里——所以内核升级不动数据，你的库里也不会长出一堆代码副本。
 
 ## 0. 库在哪
 
-本文件由 `adapters/install.mjs` 渲染，路径已写死：
+本文件由 `adapters/install.mjs` 渲染，两个路径已写死：
 
 ```
-{{VAULT}}
+VAULT   = {{VAULT}}
+KERNEL  = {{KERNEL}}
 ```
 
-下面所有命令都在该目录执行。路径变了就重跑一次安装。
+下面所有命令都在 vault 目录执行，脚本路径一律用 KERNEL。路径变了就重跑一次安装。
 
 ## 1. 先读，别急着问
 
 ```bash
-cat 目录.md                                  # 分域导航
-node scripts/search.mjs "涨粉" --limit 8       # 全文检索（中文二元切分）
-node scripts/q.mjs list                       # 结构化数据有哪些具名查询
-node scripts/recall.mjs "笔记库在哪里 怎么用"   # 问跨会话记忆
+cat 目录.md                                   # 分域导航（有的话）
+node {{KERNEL}}/scripts/search.mjs "涨粉" --limit 8      # 全文检索（中文二元切分）
+node {{KERNEL}}/scripts/q.mjs list                       # 结构化数据有哪些具名查询
+node {{KERNEL}}/scripts/recall.mjs "笔记库在哪里 怎么用"  # 问跨会话记忆
 ```
 
 三句话：**自己写过的话** → `search.mjs`；**表格型业务数据** → `q.mjs`；**"上次定过什么"** → `recall.mjs`。
+三个都查不到，才能说"库里没有"，说完顺带跑 `search.mjs --selftest` 证明检索链路没断。
 
 ## 2. 写，只走一个入口
 
 ```bash
-node scripts/capture.mjs "这次的结论" --tool workbuddy --topic x-creator
-node scripts/capture.mjs "决定先上域名再加口令" --tool trae --type decision --topic zhishu
+node {{KERNEL}}/scripts/capture.mjs "这次的结论" --tool workbuddy --topic x-creator
+node {{KERNEL}}/scripts/capture.mjs "决定先上域名再加口令" --tool trae --type decision \
+  --slug domain-first --review 2027-01-10 --topic zhishu
 ```
 
-- `--tool` 填你自己的名字（workbuddy / trae / cursor / claude / codex / opencode）
+- `--tool` 填你自己的名字（workbuddy / trae / cursor / claude / codex / opencode），决定分片
 - `--type` 取 `event`（默认）/ `decision` / `entity` / `belief` / `metric` / `artifact`
 - `--topic` 逗号分隔，用于主题反链
-- 长文本走管道：`... | node scripts/capture.mjs - --tool cursor`
+- 长文本走管道：`... | node {{KERNEL}}/scripts/capture.mjs - --tool cursor`
+- `--priv secret` 直写 `secret/`（不进 git、不进索引、不进日报），其它目录只留指针
 
-它会自己算 id、日期、分片文件（`inbox/YYYY-MM.<tool>.md`）并重建索引。**不要手写 front matter 往 inbox 里塞**——分片按工具隔离，就是为了多个工具同时写不撞车。
+它会算 id、日期、分片文件（`inbox/YYYY-MM.<tool>.md`）并重建索引。**不要手写 front matter 往 inbox 里塞**——
+分片按工具隔离，就是为了多个工具同时写不撞车。
 
 写完回一句「已归档 N 条」，不要背全文。
 
@@ -71,4 +77,13 @@ node scripts/capture.mjs "决定先上域名再加口令" --tool trae --type dec
 
 ## 5. 交接物是文件，不是聊天记录
 
-给下一个工具留信息，只写三样：文件绝对路径、`projectId`/`nodeId` 这类外部 ID、验收结论。别让下一个工具去翻上一个工具的对话。
+给下一个工具留信息，只写三样：文件绝对路径、`projectId`/`nodeId` 这类外部 ID、验收结论。
+别让下一个工具去翻上一个工具的对话。
+
+## 6. 交活前跑一次体检
+
+```bash
+node {{KERNEL}}/scripts/check.mjs
+```
+
+`FAIL`（断链、重复 id、secret 越界、缺 falsifier）必须修完再说"做完了"；`WARN` 只说一句，不拦人。

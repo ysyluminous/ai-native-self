@@ -41,27 +41,39 @@ if (!vault) {
 }
 vault = resolve(vault.replace(/^~(?=$|[\\/])/, HOME));
 
-const need = ['scripts/capture.mjs', 'scripts/search.mjs', 'scripts/q.mjs'].map((p) => join(vault, p));
+// 脚本住在内核里，不在用户库里：升级内核不动数据，库里也不会堆代码副本
+const KERNEL = resolve(HERE, '..');
+const KERNEL_P = KERNEL.split('\\').join('/'); // 打印与渲染用正斜杠，Windows 上也当命令跑
+const need = ['capture.mjs', 'search.mjs', 'q.mjs', 'recall.mjs', 'check.mjs'].map((f) =>
+  join(KERNEL, 'scripts', f),
+);
 const missing = need.filter((p) => !existsSync(p));
 if (missing.length) {
+  console.error('内核不完整，缺脚本：');
+  for (const m of missing) console.error(`  ${m}`);
+  console.error('内核版本过旧：git pull 更新内核后再装。');
+  process.exit(1);
+}
+const notVault = ['inbox', 'decisions', 'beliefs'].filter((d) => !existsSync(join(vault, d)));
+if (notVault.length) {
   console.error(`不是 ai-native-self 语料库：${vault}`);
-  for (const m of missing) console.error(`  缺 ${m}`);
+  for (const d of notVault) console.error(`  缺 ${join(vault, d)}/`);
   console.error('先跑  node scripts/init.mjs <path>  生成语料库，再回来装。');
   process.exit(1);
 }
 
 const template = readFileSync(join(HERE, 'SKILL.md.tmpl'), 'utf8');
-const rendered = template.replaceAll('{{VAULT}}', vault);
-
+const rendered = template.replaceAll('{{VAULT}}', vault).replaceAll('{{KERNEL}}', KERNEL_P);
 const MARK_BEGIN = '<!-- ai-native-self-vault:begin -->';
 const MARK_END = '<!-- ai-native-self-vault:end -->';
 const POINTER = `${MARK_BEGIN}
 ## 个人原生库（常驻）
 
-个人事实、决策、笔记、产出都在 \`${vault}\`。
+个人事实、决策、笔记、产出都在 \`${vault}\`。脚本住在内核 \`${KERNEL_P}\`（升级内核不动数据）。
 
-- 查：\`node scripts/search.mjs "词"\` / \`node scripts/q.mjs list\` / \`node scripts/recall.mjs "问句"\`
-- 写：\`node scripts/capture.mjs "内容" --tool <你的名字> --topic <主题>\`
+- 查：\`node "${KERNEL_P}/scripts/search.mjs" "词"\` / \`node "${KERNEL_P}/scripts/q.mjs" list\` / \`node "${KERNEL_P}/scripts/recall.mjs" "问句"\`
+- 写：\`node "${KERNEL_P}/scripts/capture.mjs" "内容" --tool <你的名字> --topic <主题>\`
+- 交活前：\`node "${KERNEL_P}/scripts/check.mjs"\`
 - 定下方案、跑通流程、产出文件，结束前必须落库；只追加不改历史块；语料不出本机、不进公开仓库。
 
 细则见 skill \`${NAME}\`。
@@ -160,7 +172,7 @@ console.log(`
 Trae / Cursor 的常驻规则在自己的设置里，把下面这段贴进「用户规则」：
 
 我的个人事实、决策、笔记、产出都在 ${vault}。
-查用 node scripts/search.mjs / q.mjs / recall.mjs；写只用 node scripts/capture.mjs "内容" --tool <工具名> --topic 主题。
-定下方案、跑通流程、产出文件，结束前必须落库。
+查用 node "${KERNEL_P}/scripts/search.mjs" / q.mjs / recall.mjs；写只用 node "${KERNEL_P}/scripts/capture.mjs" "内容" --tool <工具名> --topic 主题。
+定下方案、跑通流程、产出文件，结束前必须落库；交活前跑 node "${KERNEL_P}/scripts/check.mjs"。
 `);
 if (fail) process.exit(1);
