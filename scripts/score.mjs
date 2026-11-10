@@ -50,9 +50,19 @@ const bannedHit = banned.filter((w) => kernelText.includes(w)).length;
 add('guardrail', '高风险黑名单', 10, bannedHit >= 4 ? 1 : bannedHit / 4, `明文禁用项命中 ${bannedHit}/5`);
 
 // 5 可验证性：能跑的东西在不在
-const runnable = ['scripts/init.mjs', 'scripts/lint-packs.mjs', 'scripts/score.mjs', 'examples/README.md']
-  .filter((p) => fs.existsSync(path.join(ROOT, p))).length;
-add('verifiable', '可验证性', 12, runnable / 4, `可运行/可复现资产 ${runnable}/4`);
+const assets = [
+  'scripts/init.mjs',
+  'scripts/capture.mjs',
+  'scripts/search.mjs',
+  'scripts/q.mjs',
+  'scripts/recall.mjs',
+  'scripts/check.mjs',
+  'scripts/lint-packs.mjs',
+  'scripts/score.mjs',
+  'examples/README.md',
+];
+const runnable = assets.filter((p) => fs.existsSync(path.join(ROOT, p))).length;
+add('verifiable', '可验证性', 12, runnable / assets.length, `可运行/可复现资产 ${runnable}/${assets.length}`);
 
 // 6 模板与契约一致：每个模板都有 type 字段
 const typed = templates.filter((f) => /^---[\s\S]*?type:/m.test(read(`templates/${f}`))).length;

@@ -21,7 +21,7 @@
 | 结构完整性 | 15 | SKILL 头部、四条内核规则、八个模板是否齐 |
 | 失败模式编码 | 12 | `kernel/principles.md` 里失效条件与反例的密度 |
 | 高风险黑名单 | 10 | 破坏性操作是否明文列禁（`reset --hard`、`--force`、推公开库、写密码） |
-| 可验证性 | 12 | `init.mjs`、`lint-packs.mjs`、`score.mjs`、`examples/` 在不在 |
+| 可验证性 | 12 | `init/capture/search/q/recall/check/lint-packs/score.mjs` 与 `examples/` 在不在（9 项） |
 | 模板与契约一致 | 10 | 每个模板都有 `type:`，与 `record-types.md` 对得上 |
 | 隐私护栏 | 10 | 三级隐私定义 + 独立的 `PRIVACY.md` |
 | 无个人数据 | 8 | 扫描邮箱、内网 IP、本机路径、连接串、令牌（代码块内的示例不算） |
@@ -73,8 +73,9 @@ node scripts/lint-packs.mjs <你的语料仓库>        # 包契约（示例包�
 每次大改后跑一遍，四项全过才算干净：
 
 ```bash
-node scripts/loop.mjs                       # 索引与数据源通断
-node scripts/search.mjs "随便一个词" --limit 3 # 检索还能命中
+node <内核>/scripts/check.mjs --selftest    # 体检脚本自己先过阳性对照
+node <内核>/scripts/check.mjs               # FAIL 阻断，WARN 只提示节律/派生层
+node <内核>/scripts/search.mjs "随便一个词" --limit 3   # 检索还能命中
 git status --porcelain                      # 没有意外改动
 ```
 
@@ -90,5 +91,6 @@ git status --porcelain                      # 没有意外改动
 |---|---|---|
 | 2026-11-08 | 67.5 | 首次评分：SKILL 头部读取失败（BOM）、缺禁止清单、README 缺许可证 |
 | 2026-11-08 | 95.0 | 修 BOM 解析、补禁止清单、删四处模糊措辞、重写 README（含许可证与站内链接） |
+| 2026-11-10 | 100.0 | 补写入层（capture/search/q/recall/check + lib）、修 adapters 判据、统一 inbox 分片、清掉 4 处模糊措辞 |
 
 下一次改动请在这里追加一行，写明分差与原因。分差为负的改动不该留在主线上。

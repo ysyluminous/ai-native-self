@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 // Zero-dependency scaffold for a personal life-data repo (ai-native-self skill).
 // Usage: node scripts/init.mjs <targetDir> [--priv private|secret] [--time HH:MM] [--no-git]
 import fs from 'node:fs';
@@ -28,7 +28,7 @@ const skillUrl = path
 
 const now = new Date();
 const year = now.getFullYear();
-const half = now.getMonth() < 6 ? 'H1' : 'H2';
+const month = `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 const today = now.toISOString().slice(0, 10);
 
 const created = [];
@@ -51,15 +51,16 @@ const put = (p, body) => {
   `attachments/${year}`, 'attachments/imports', 'packs/self', 'secret', 'index',
 ].forEach((d) => mk(path.join(root, d)));
 
-put(path.join(root, 'inbox', `${year}-${half}.md`), `---
+put(path.join(root, 'inbox', `${month}.md`), `---
 repo: inbox
-period: ${year}-${half}
+period: ${month}
 priv_default: ${privDefault}
 ---
 
-# ${year} ${half} 倾倒区
+# ${month} 倾倒区
 
-<!-- 追加到文件末尾。一条一个块，块首是 front matter。永不重写历史块。 -->
+<!-- 追加到文件末尾。一条一个块，块首是 front matter。永不重写历史块。
+     同一个月的多工具并发写入走分片：inbox/${month}.<tool>.md，检索按 inbox/*.md 一视同仁。 -->
 `);
 
 put(path.join(root, 'secret', 'README.md'), `---
@@ -86,7 +87,7 @@ put(path.join(root, 'AGENTS.md'), `---
 kind: data-repo
 generated: ${today}
 skill_root: ${skillUrl}
-kernel_version: 0.1.0
+kernel_version: 0.2.0
 ---
 
 # 我的语料仓库（ai-native-self）
@@ -107,6 +108,8 @@ kernel_version: 0.1.0
 
 ## 硬约束（不得违反）
 
+- **写入只走一个入口**：\`node ${skillUrl}/scripts/capture.mjs "<内容>" --topic <主题>\`。
+  它负责算 id、分片、隐私路由（secret 只进 \`secret/\`）并重建索引；不要手写 front matter 往 inbox 里塞。
 - 不重写、重排、删除 \`inbox/\` 历史块；更正用新块 + refs 指向原块。
 - 不把语料外发到任何第三方服务（含 embedding、云同步、联网搜索的 query）。
 - \`priv: secret\` 的内容不进日报、不进索引、不进 git、不进对外产出。
@@ -117,6 +120,22 @@ kernel_version: 0.1.0
 - \`reviews/\` 与 \`index/\` 是派生物，可删除重建，不得被 refs 指向。
 - 冷启动时间表：第 1-2 周只允许写 \`inbox/\`；不要提前建索引、装数据库、加自动化。
 - 采集超过 20 秒就是本系统的缺陷：不追问、不要求填表、不做评判。
+
+## 常用命令（在本仓库目录里执行）
+
+\`\`\`bash
+# 写（唯一入口；分片按 月 × 工具，多工具同时写不撞车）
+node ${skillUrl}/scripts/capture.mjs "今天的结论" --topic <主题> [--tool <工具名>]
+node ${skillUrl}/scripts/capture.mjs "定下的决策" --type decision --slug <英文slug> --review 2027-01-10
+
+# 读
+node ${skillUrl}/scripts/search.mjs "关键词" --limit 8     # 全文检索（中文二元切分）
+node ${skillUrl}/scripts/q.mjs list                        # 具名结构化查询
+node ${skillUrl}/scripts/recall.mjs "我以前怎么想的"        # 跨会话记忆召回
+
+# 体检（批量写入后 / 每次提交前）
+node ${skillUrl}/scripts/check.mjs
+\`\`\`
 `);
 
 put(path.join(root, 'README.md'), `---
@@ -135,7 +154,7 @@ kind: data-repo
 
 if (!args.includes('--no-git') && !fs.existsSync(path.join(root, '.git'))) {
   try {
-    execFileSync('git', ['init', '-q'], { cwd: root });
+    execFileSync('git', ['init', '-q'], { cwd: root, stdio: 'ignore' });
     created.push('.git/');
   } catch {
     console.warn('警告: 未找到 git，已跳过 git init，可稍后手动执行。');
@@ -149,9 +168,10 @@ if (skipped.length) {
   console.log(`跳过: ${names}${skipped.length > 6 ? ' …' : ''}`);
 }
 console.log('\n下一步：');
-console.log(`  1. 在这个目录里打开 agent，说「记一下：${today} 今天 …」`);
+console.log(`  1. 写第一条（唯一入口）：node ${skillUrl}/scripts/capture.mjs "今天…" --topic 随便一个`);
 console.log(`  2. 每晚 ${dailyTime} 花 30 秒倾倒；第 1-2 周只写 inbox/`);
 console.log('  3. 第 4 周说「周复盘」；第 12 周说「季度编译我」');
 console.log('  4. 配私有远端：git remote add origin <你的私有仓库>');
-console.log('  5. 想插一套思维框架：自建说「给 <名字> 建一个包」（需要 A/B 级材料）；');
-console.log('     官方包直接复制进来：cp -r <内核目录>/packs/{munger,bayes} packs/\n');
+console.log(`  5. 体检：node ${skillUrl}/scripts/check.mjs`);
+console.log('  6. 想插一套思维框架：自建说「给 <名字> 建一个包」（需要 A/B 级材料）；');
+console.log(`     官方包直接复制进来：cp -r ${skillUrl}/packs/{munger,bayes} packs/\n`);
