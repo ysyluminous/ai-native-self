@@ -70,6 +70,12 @@ const firstMeaningful = (b, dropHeading = true) => {
   return (line || '').trim().replace(/^[-*]\s*/, '').slice(0, 100);
 };
 
+let history = { available: false, hits: [] };
+if (args.history) {
+  const { searchHistory } = await import('./history.mjs');
+  history = await searchHistory(question, { limit });
+}
+
 if (json) {
   console.log(
     JSON.stringify(
@@ -79,6 +85,7 @@ if (json) {
         beliefs: beliefs.map(({ b, s }) => ({ score: s, id: b.fm.id, confidence: b.fm.confidence, status: b.fm.status, claim: b.fm.claim || '', file: b.file, line: b.line })),
         entities: entities.map(({ b, s }) => ({ score: s, id: b.fm.id, name: b.fm.name || '', file: b.file, line: b.line })),
         events: events.map(({ b, s }) => ({ score: s, id: b.fm.id, date: blockDate(b), file: b.file, line: b.line })),
+        history: args.history ? history.hits.map((h) => ({ source: h.source, title: h.title, date: h.created_at, id: h.conversation_id, snippet: h.snippet })) : undefined,
         empty: ranked.length === 0,
       },
       null,
@@ -90,7 +97,7 @@ if (json) {
 
 console.log(`\n问：${question}\n`);
 
-if (!ranked.length) {
+if (!ranked.length && !(args.history && history.hits.length)) {
   console.log('库里没有这条记录。');
   console.log('不要用模型常识补一个"你以前大概这么想"——那会把推断写成你的历史。');
   console.log(`可以换个词再查：node scripts/search.mjs "${qTokens.slice(0, 2).join(' ')}"`);
@@ -130,6 +137,23 @@ if (events.length) {
   for (const { b } of events) {
     console.log(`- ${b.fm.id} · ${blockDate(b)} · ${firstMeaningful(b)}`);
     console.log(`  ${b.file}:${b.line}`);
+  }
+  console.log('');
+}
+
+if (args.history) {
+  console.log('## 对话原文（omnihist）');
+  if (!history.available) {
+    console.log('- 没找到 omnihist 库。先装：npm i -g github:ysyluminous/omnihist && omnihist sync');
+  } else if (!history.hits.length) {
+    console.log('- 对话库里没有命中；换个词，或先跑 omnihist sync。');
+  } else {
+    for (const h of history.hits) {
+      const d = h.created_at ? new Date(Number(h.created_at)).toISOString().slice(0, 16).replace('T', ' ') : '';
+      console.log(`- [${h.source}] ${d} · ${h.title || '(untitled)'}`);
+      console.log(`  ${String(h.snippet || '').replace(/\s+/g, ' ').slice(0, 240)}`);
+      console.log(`  id: ${h.conversation_id}`);
+    }
   }
   console.log('');
 }

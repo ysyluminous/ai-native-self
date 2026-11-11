@@ -152,6 +152,12 @@ metadata:
 找不到就明说"库里没有这条记录"，不得用模型常识补一个答案冒充用户的历史。
 **报告 0 命中之前先跑阳性对照**：查一条你确定存在的 id，确认检索链路活着。
 
+**对话原文**：如果问题是"我在哪个工具里说过 / 聊过 / 让哪个 AI 做过"，先跑
+`node scripts/history.mjs "<问句>"`（读 omnihist 收进来的 16 类工具历史），或
+`node scripts/recall.mjs "<问句>" --history`，把语料结论和对话原文一起给出。
+两者都返回 `source` 和 `conversation id`；要看全文用 `omnihist show <id>`。
+没有 omnihist 库时明说"对话库还没装 / 没同步"，不要假装查过。
+
 ## 协议五 · 决策
 
 模板 `templates/decision.md`，结构件见 `kernel/principles.md`。流程：
