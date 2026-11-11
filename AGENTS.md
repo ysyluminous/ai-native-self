@@ -32,11 +32,12 @@
 
 ```
 SKILL.md              七段协议，agent 的入口
-kernel/               四条硬规则
+kernel/               规则与协议
   principles.md       12 条结构件，每条带失效条件
   record-types.md     六类记录与字段
   capture.md          20 秒规则 / 8 槽位 / 隐私分级
   cadence.md          日 / 周 / 月 / 季的硬节律
+  coord.md            多智能体协作：五段状态机 + 四段流转与落库判据
 templates/            八种记录的空白模板
 packs/                官方包（munger、bayes）+ 模板 + 登记表
 examples/             可复现样例，语料是虚构的
