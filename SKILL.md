@@ -158,6 +158,11 @@ metadata:
 两者都返回 `source` 和 `conversation id`；要看全文用 `omnihist show <id>`。
 没有 omnihist 库时明说"对话库还没装 / 没同步"，不要假装查过。
 
+**智枢业务数据**：推文、内容、案例、素材、选题、协调任务/决策，跑
+`node scripts/zhishu.mjs "<问句>"`。服务在 `127.0.0.1:8765`，没起来就先启动
+`D:\code\yunxiao\zhishu\search\run.py`。结构化统计（曝光、分类、时间）直接写 SQL，
+不要绕检索。
+
 ## 协议五 · 决策
 
 模板 `templates/decision.md`，结构件见 `kernel/principles.md`。流程：
