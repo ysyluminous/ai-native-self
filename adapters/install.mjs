@@ -54,7 +54,10 @@ if (missing.length) {
   console.error('内核版本过旧：git pull 更新内核后再装。');
   process.exit(1);
 }
-const notVault = ['inbox', 'decisions', 'beliefs'].filter((d) => !existsSync(join(vault, d)));
+const notVault = ['inbox', 'decisions'].filter((d) => !existsSync(join(vault, d)));
+if (!existsSync(join(vault, 'beliefs'))) {
+  console.log('提示：没有 beliefs/，belief 相关协议会跳过，其余照常安装。');
+}
 if (notVault.length) {
   console.error(`不是 ai-native-self 语料库：${vault}`);
   for (const d of notVault) console.error(`  缺 ${join(vault, d)}/`);
