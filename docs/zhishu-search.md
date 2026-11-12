@@ -11,6 +11,12 @@ python run.py
 
 默认 `http://127.0.0.1:8765`，同时提供 REST 和 MCP。
 
+## 直接提问（推荐）
+
+kernel 装好后，用户只需要问，例如「养生药膳有哪些」「我以前在哪说过 eSIM」。
+agent 按 `SKILL.md` 的问题路由表自动选 `recall.mjs` / `history.mjs` / `zhishu.mjs`，
+不需要用户先敲命令。`zhishu.mjs` 发现服务没起来会自动拉起 `run.py`。
+
 ## 命令行
 
 ```bash

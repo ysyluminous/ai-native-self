@@ -38,6 +38,20 @@ node {{KERNEL}}/scripts/recall.mjs "笔记库在哪里 怎么用"  # 问跨会�
 三句话：**自己写过的话** → `search.mjs`；**表格型业务数据** → `q.mjs`；**"上次定过什么"** → `recall.mjs`。
 三个都查不到，才能说"库里没有"，说完顺带跑 `search.mjs --selftest` 证明检索链路没断。
 
+## 1.5 问题路由（用户只提问，不要让他先跑命令）
+
+用户问一句话时，先判断，再自己调用；不要把命令丢回给用户。
+
+| 问题 | 走哪 |
+|---|---|
+| 个人事实、决策、以前怎么想 | `node {{KERNEL}}/scripts/recall.mjs` |
+| 在哪个 AI 工具里说过/做过 | `node {{KERNEL}}/scripts/history.mjs` |
+| 智枢推文、CMS、素材、协调任务/决策 | `node {{KERNEL}}/scripts/zhishu.mjs` |
+| 曝光/分类/时间等统计 | 直接 SQL，不走检索 |
+| 通用知识 | 不用检索 |
+
+如果当前工具已接 `zhishu-search` MCP，优先调 `search` 工具；没有就运行对应脚本。查不到就说没找到，不要用模型常识补。
+
 ## 2. 写，只走一个入口
 
 ```bash
