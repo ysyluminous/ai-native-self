@@ -24,6 +24,22 @@ omnihist sync
 
 `omnihist` 会把会话写进 `~/.omnihist/omnihist.db`（SQLite + FTS5，单文件）。
 
+## 定时同步
+
+会话不会自己进库。本机已建两个计划任务：
+
+| 任务 | 频率 | 作用 |
+|---|---|---|
+| `ai-native-mem-sync` | 每小时 | `omnihist sync` + 同步到 PG `mem`（文档索引、会话元数据） |
+| `ai-native-daily-digest` | 每天 07:00 | 写 `state/digests/YYYY-MM-DD.md` 摘要 |
+| `ai-native-daily-flywheel` | 每天 07:30 | 四项链路自检，写 `state/flywheel/YYYY-MM-DD.md` |
+
+同步断了的最明显症状：`omnihist stats` 的 `last` 停在几天前，`history.mjs` 查不到最近的对话。
+先手动跑一次 `scripts\sync-all.ps1`，再看任务是否被禁用。
+
+跨工具共享的完整方案（PG16 `mem` schema、上下文预算、工具合规契约）见
+[`shared-memory.md`](shared-memory.md)。
+
 ## 使用
 
 ```bash

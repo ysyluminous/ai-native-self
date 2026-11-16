@@ -65,6 +65,7 @@ metadata:
 
 1. **数据仓库在哪**：让用户给一个本地路径（默认 `~/life`）。没有就创建。
    运行脚手架：`node <skill>/scripts/init.mjs <path>`，然后 `git init`。
+   装进各工具：`node <skill>/adapters/install.mjs --vault <path> --force`；完整步骤见 `docs/getting-started.md`。
 2. **隐私默认值**：`priv` 缺省是 `private`（本地 git 提交）还是 `secret`（不提交）？默认 private。
 3. **日节律时间**：用户什么时候愿意花 30 秒（如每晚 22:30）。记进数据仓库根的 `AGENTS.md`。
 
@@ -141,10 +142,24 @@ metadata:
 | 个人事实、决策、以前怎么想 | `scripts/recall.mjs` |
 | 在哪个 AI 工具里说过/做过 | `scripts/history.mjs` |
 | 智枢推文、CMS、素材、协调任务/决策 | `scripts/zhishu.mjs` |
+| 最近刚说/刚定的事 | 语料库 `scripts/feed.py --limit 10` |
 | 曝光/分类/时间等统计 | 直接 SQL，不走检索 |
 | 通用知识 | 不用检索 |
 
 如果当前工具已接 `zhishu-search` MCP，优先调 `search` 工具；没有就运行对应脚本。查不到就说没找到，不要用模型常识补。
+
+**主动推送**：定下结论、方案或取舍后，立刻在语料库运行 `node scripts/push.mjs "原文" --tool <名字> --type decision --topic <主题>`，
+当场写进语料库并刷进 PG16 `mem`；定时同步只是兜底。
+
+**硬规则：先查库，再问人。** 只要问题涉及用户自己的事实、决策、路径、账号、偏好，必须先跑
+`recall.mjs` → `history.mjs` → `zhishu.mjs`；命中就直接用并给定位，三步都没有才允许问用户。
+禁止把「请把仓库路径 / 数据库账号 / 之前怎么定的发我」丢回给用户。
+
+**上下文预算**：一次回答最多引用 10 条决策（每条 ≤200 字）+ 5 条会话（只取标题、时间、片段），
+总计 ≤2000 字；超过就只留结论 + 文件路径 / `conversation id`，全文用 `omnihist show` 按需看。
+
+对话采集由公开子技能 `omnihist` 负责（独立仓库），内核只调用、不复制它的代码。新机器一条命令：
+`node scripts/setup.mjs --vault <语料库路径> --install-deps --tasks`。
 
 ## 协议四 · 检索（grep 优先，无 DB）
 

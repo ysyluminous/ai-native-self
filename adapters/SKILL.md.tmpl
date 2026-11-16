@@ -26,6 +26,18 @@ KERNEL  = {{KERNEL}}
 
 下面所有命令都在 vault 目录执行，脚本路径一律用 KERNEL。路径变了就重跑一次安装。
 
+### 0.1 库还没建？
+
+如果 `VAULT` 路径不存在，不要猜、不要往公开仓库里写个人数据。先让用户选一个目录，然后：
+
+```bash
+node {{KERNEL}}/scripts/init.mjs <用户选的路径> --priv private
+node {{KERNEL}}/adapters/install.mjs --vault <用户选的路径> --force
+```
+
+装完让用户在新会话里说「记一下：……」和「我以前定过什么」各试一次。完整上手页是
+`{{KERNEL}}/docs/getting-started.md`。
+
 ## 1. 先读，别急着问
 
 ```bash
@@ -47,10 +59,29 @@ node {{KERNEL}}/scripts/recall.mjs "笔记库在哪里 怎么用"  # 问跨会�
 | 个人事实、决策、以前怎么想 | `node {{KERNEL}}/scripts/recall.mjs` |
 | 在哪个 AI 工具里说过/做过 | `node {{KERNEL}}/scripts/history.mjs` |
 | 智枢推文、CMS、素材、协调任务/决策 | `node {{KERNEL}}/scripts/zhishu.mjs` |
+| 最近刚说/刚定的事 | `python {{VAULT}}/scripts/feed.py --limit 10` |
 | 曝光/分类/时间等统计 | 直接 SQL，不走检索 |
 | 通用知识 | 不用检索 |
 
 如果当前工具已接 `zhishu-search` MCP，优先调 `search` 工具；没有就运行对应脚本。查不到就说没找到，不要用模型常识补。
+
+**主动推送**：一旦定下结论、方案或取舍，立刻执行（不要等每小时同步）：
+
+```bash
+node {{VAULT}}/scripts/push.mjs "决定的原文" --tool <你的名字> --type decision --topic <主题>
+```
+
+它会把内容写进语料库并当场刷进 PG16 `mem`；定时同步只做兜底。下一句问题就能在别的工具里查到。
+
+**硬规则：先查库，再问人。** 只要问题涉及用户自己的事实、决策、路径、账号、偏好，必须先跑
+`recall.mjs` → `history.mjs` → `zhishu.mjs`；命中就直接用并给定位，三步都没有才允许问用户。
+禁止把「请把仓库路径 / 数据库账号 / 之前怎么定的发我」丢回给用户。
+
+**上下文预算**：一次回答最多引用 10 条决策（每条 ≤200 字）+ 5 条会话（只取标题、时间、片段），
+总计 ≤2000 字；超过就只留结论 + 文件路径 / `conversation id`，全文用 `omnihist show` 按需看。
+
+对话采集由公开子技能 `omnihist` 负责（独立仓库），内核只调用、不复制它的代码。新机器一条命令：
+`node {{KERNEL}}/scripts/setup.mjs --vault {{VAULT}} --install-deps --tasks`。
 
 ## 2. 写，只走一个入口
 

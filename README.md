@@ -10,6 +10,22 @@
 - 读法：`SKILL.md` 是协议，`kernel/` 是硬规则，`templates/` 是字段模板
 - 用法：clone 下来，一条命令生成你自己的私有语料仓库，然后只管往里倾倒
 
+## 5 分钟上手
+
+```bash
+git clone https://github.com/ysyluminous/ai-native-self.git ai-native-self-kernel
+cd ai-native-self-kernel
+node scripts/init.mjs C:\work\my-life --priv private
+node adapters/install.mjs --vault C:\work\my-life --force
+```
+
+1. 内核只放方法，私有库只放你的数据。
+2. 技能自动装进 Claude Code / Trae / Trae CN / WorkBuddy / Cursor / Codex / OpenCode。
+3. 开新会话说「记一下：……」再问「我以前定过什么」，能答上就通了。
+
+完整步骤、验证方法、换机器和可选的对话/数据库同步见
+[`docs/getting-started.md`](docs/getting-started.md)。
+
 ---
 
 ## 30 秒理解
@@ -222,6 +238,24 @@ node scripts/lint-packs.mjs examples/life-repo
 
 **分数只升不降。** 每轮只改一个维度，改完独立评分，涨了保留、掉了 `git revert`。
 完整规则见 [`docs/evolution.md`](docs/evolution.md)。当前基线写在里面，随时可复算。
+
+## 跨工具共享
+
+同一个问题不该问两遍。一份命令装好，之后所有工具共用一套记忆：
+
+```bash
+node scripts/setup.mjs --vault "<语料库路径>" --install-deps --tasks
+```
+
+三份文档说明边界与运行方式：
+
+- [`docs/shared-memory.md`](docs/shared-memory.md)：真源分层、PG16 `mem` schema、同步管线、上下文预算、工具合规契约。
+- [`docs/flywheel.md`](docs/flywheel.md)：数据飞轮四条链路、每天自检、一条命令安装。
+- [`docs/task-registry.md`](docs/task-registry.md)：定时任务跨工具备份与迁移（WorkBuddy / OpenMausBot / Windows）。
+- [`docs/history.md`](docs/history.md)：`omnihist` 作为公开子技能，怎么采集 16 类工具、查询与定时同步。
+- [`docs/zhishu-search.md`](docs/zhishu-search.md)：智枢业务数据与检索服务。
+
+硬规则只有一条：**先查库，再问人**。查到就带定位直接用；三步都没有，才允许问用户。
 
 ## 它不做什么
 

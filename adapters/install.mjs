@@ -76,6 +76,8 @@ const POINTER = `${MARK_BEGIN}
 
 - 查：\`node "${KERNEL_P}/scripts/search.mjs" "词"\` / \`node "${KERNEL_P}/scripts/q.mjs" list\` / \`node "${KERNEL_P}/scripts/recall.mjs" "问句"\`
 - 写：\`node "${KERNEL_P}/scripts/capture.mjs" "内容" --tool <你的名字> --topic <主题>\`
+- 刚定完结论：\`node "${vault}/scripts/push.mjs" "结论" --tool <你的名字> --type decision --topic <主题>\`（秒级进共享层，别等定时）
+- 问「最近定了什么 / 最先做什么」：\`python "${vault}/scripts/feed.py" --limit 10\`
 - 交活前：\`node "${KERNEL_P}/scripts/check.mjs"\`
 - 定下方案、跑通流程、产出文件，结束前必须落库；只追加不改历史块；语料不出本机、不进公开仓库。
 
@@ -99,9 +101,11 @@ const pickDir = (base, preferred, fallback) => {
 const skills = [
   ['Claude Code', join(HOME, '.claude', 'skills', NAME)],
   ['Trae', join(HOME, '.trae', 'skills', NAME)],
+  ['Trae CN', join(HOME, '.trae-cn', 'skills', NAME)],
   ['WorkBuddy', join(HOME, '.workbuddy', 'skills', NAME)],
   ['Cursor', join(pickDir('.cursor', 'skills', 'skills-cursor'), NAME)],
   ['Codex', join(HOME, '.codex', 'skills', NAME)],
+  ['OpenCode', join(HOME, '.config', 'opencode', 'skills', NAME)],
 ];
 
 for (const [label, dir] of skills) {
@@ -176,6 +180,7 @@ Trae / Cursor 的常驻规则在自己的设置里，把下面这段贴进「用
 
 我的个人事实、决策、笔记、产出都在 ${vault}。
 查用 node "${KERNEL_P}/scripts/search.mjs" / q.mjs / recall.mjs；写只用 node "${KERNEL_P}/scripts/capture.mjs" "内容" --tool <工具名> --topic 主题。
+刚定完结论立刻跑 node "${vault}/scripts/push.mjs" "结论" --tool <工具名> --type decision --topic 主题；问「最近定了什么」先跑 python "${vault}/scripts/feed.py" --limit 10。
 定下方案、跑通流程、产出文件，结束前必须落库；交活前跑 node "${KERNEL_P}/scripts/check.mjs"。
 `);
 if (fail) process.exit(1);

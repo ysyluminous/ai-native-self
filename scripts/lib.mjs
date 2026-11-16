@@ -130,6 +130,9 @@ export function walkMarkdown(dir, base = '', out = [], opts = {}) {
     if (name === 'secret' && !opts.includeSecret) continue;
     const abs = path.join(dir, name);
     const rel = base ? `${base}/${name}` : name;
+    // 语料库里的 kernel/ templates/ examples/ 是指向公开内核的目录链接。
+    // 扫描它们会把内核里的模板示例当成正文，产生假重复 id（art-014 等）。
+    if (['kernel', 'templates', 'examples'].includes(name) && fs.lstatSync(abs).isSymbolicLink()) continue;
     const st = fs.statSync(abs);
     if (st.isDirectory()) walkMarkdown(abs, rel, out, opts);
     else if (name.endsWith('.md')) out.push({ abs, rel });
